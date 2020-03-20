@@ -39,20 +39,14 @@
  алгоритмов, каждый из которых выделяет в динамической памяти числовой массив размером 100 Мб и подсчитывает
  элементарную контрольную сумму массива. Способ подсчета контрольной суммы — сумма всех чисел по модулю 1024.
 */
-#include <time.h>
+
 #include <dlfcn.h>
 #include <stdio.h>
 
-long mtime() {
-    struct timespec t;
+#include "timer.h"
 
-    clock_gettime(CLOCK_REALTIME, &t);
-    long mt = (long)t.tv_sec * 1000 + t.tv_nsec / 1000000;
-    return mt;
-}
-
-//#include "lib_includes.h"
-#include "dlib_includes.h"
+#include "lib_includes.h"
+//#include "dlib_includes.h"
 
 int main() {
 
@@ -65,18 +59,34 @@ int main() {
     size_t size = 0;
     int * massive = NULL;
 
-    long t = mtime();
+    long t;
+    long time_static = 0;
+    long time_dynamic = 0;
 
-    massive = get_massive_memory(&size);
+    for (char i = 0; i < ACCURACY; i++) {
+        t = mtime();
+
+        massive = get_massive_memory(&size);
+        init_massive(massive, size);
+        count_elementary_sum(massive, size);
+        free_massive_memory(massive, size);
+
+        t = mtime() - t;
+        time_static += t;
+    }
+
+    time_static /= ACCURACY;
+
+    /*massive = get_massive_memory(&size);
 
     init_massive(massive, size);
 
     count_elementary_sum(massive, size);
 
-    free_massive_memory(massive, size);
+    free_massive_memory(massive, size);*/
 
-    t = mtime() - t;
-    printf("Threads library takes %ld ms", t);
+
+    printf("Static library takes %ld ms", time_static);
 
    // dlclose(lib_handler);
     return 0;

@@ -1,7 +1,7 @@
 project(tests)
 
 include_directories(../googletest/googletest/include)
-include_directories(../library)
+include_directories(../library_static)
 
 add_executable(Google_Tests_run tests.cpp)
 

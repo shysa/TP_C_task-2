@@ -2,7 +2,7 @@ language: c
 
 branches:
   only:
-    - base
+    - dev
 
 matrix:
   include:
@@ -36,7 +36,7 @@ script:
   - make
   - ctest --output-on-failure
   - valgrind --leak-check=full --leak-resolution=med --track-origins=yes --vgdb=no ./tests/Google_Tests_run
-  - cppcheck --enable=all --std=c99 --check-config --suppress=missingIncludeSystem ../library/library.c ../library/lib_includes.h
+  - cppcheck --enable=all --std=c99 --check-config --suppress=missingIncludeSystem ../library_static/library_static.c ../library_static/lib_includes.h
 
 
 after_success:

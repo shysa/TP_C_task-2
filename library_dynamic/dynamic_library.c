@@ -20,7 +20,6 @@ void* count_part_sum(void* thr_data) {
         data->thr_sum %= MODULE;
     }
 
-    //printf("%d\n",data->thr_sum);
     return NULL;
 }
 
@@ -136,9 +135,7 @@ int init_massive(int* massive, const size_t size) {
 
     for (size_t i = 0; i < size; i++) {
         massive[i] = rand() % 1025;
-        //printf("%d ", massive[i]);
     }
-    //printf("\n");
     return 0;
 }
 

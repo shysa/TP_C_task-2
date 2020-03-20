@@ -19,7 +19,6 @@ int init_massive(int* massive, const size_t size) {
     for (size_t i = 0; i < size; i++) {
         massive[i] = rand() % 1025;
     }
-    printf("\n");
     return 0;
 }
 
