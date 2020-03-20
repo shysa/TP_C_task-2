@@ -1,14 +1,15 @@
 #include <gtest/gtest.h>
+#include <time.h>
 
 extern "C" {
     #include "lib_includes.h"
+    #include "dlib_includes.h"
 }
 
 int main(int argc, char **argv) {
-    ::testing::InitGoogleTest(&argc, argv);
+    ::testing::GTEST_FLAG(repeat) = 5;
 
-    testing::GTEST_FLAG(print_time) = true;
-    testing::GTEST_FLAG()
+    ::testing::InitGoogleTest(&argc, argv);
 
     return RUN_ALL_TESTS();
 }
@@ -16,7 +17,18 @@ int main(int argc, char **argv) {
 
 // STATIC LIBRARY
 
-TEST(CreatingMassive, CountSuccess) {
+long mtime() {
+    struct timespec t{};
+
+    clock_gettime(CLOCK_REALTIME, &t);
+    long mt = (long)t.tv_sec * 1000 + t.tv_nsec / 1000000;
+    return mt;
+}
+
+
+TEST(StaticCreatingMassive, CountSuccess) {
+    long t = mtime();
+
     size_t size = 0;
     int * massive = nullptr;
 
@@ -29,4 +41,7 @@ TEST(CreatingMassive, CountSuccess) {
 
     EXPECT_FALSE(free_massive_memory(massive, size));
 
+    t = mtime() - t;
+    printf("Static library takes %ld ms", t);
 }
+

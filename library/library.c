@@ -28,13 +28,13 @@ int count_elementary_sum(const int * massive, const size_t size) {
         return -1;
     }
 
-    unsigned long int sum = 0;
-    #define MASK MODULE-1
+    int sum = 0;
 
     for (size_t i = 0; i < size; i++) {
-        sum += massive[i] & MASK;
-        sum &= MASK;
+        sum += massive[i] % MODULE;
+        sum %= MODULE;
     }
+
     return 0;
 }
 

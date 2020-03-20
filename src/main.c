@@ -39,34 +39,45 @@
  алгоритмов, каждый из которых выделяет в динамической памяти числовой массив размером 100 Мб и подсчитывает
  элементарную контрольную сумму массива. Способ подсчета контрольной суммы — сумма всех чисел по модулю 1024.
 */
+#include <time.h>
+#include <dlfcn.h>
+#include <stdio.h>
 
+long mtime() {
+    struct timespec t;
 
-#include "lib_includes.h"
+    clock_gettime(CLOCK_REALTIME, &t);
+    long mt = (long)t.tv_sec * 1000 + t.tv_nsec / 1000000;
+    return mt;
+}
+
+//#include "lib_includes.h"
+#include "dlib_includes.h"
 
 int main() {
+
+    /*void * lib_handler = dlopen("libdynamic_lib.so", RTLD_LAZY);
+    if (!lib_handler) {
+        fprintf(stderr,"dlopen() error: %s\n", dlerror());
+        return -1;
+    };*/
+
     size_t size = 0;
     int * massive = NULL;
 
+    long t = mtime();
+
     massive = get_massive_memory(&size);
-    if (!massive) {
-        printf("Memory allocation error");
-        return -1;
-    }
 
-    if (init_massive(massive, size)) {
-        printf("Massive can't be inited");
-        return -1;
-    }
+    init_massive(massive, size);
 
-    if (count_elementary_sum(massive, size)) {
-        printf("Sum can't be calculated");
-        return -1;
-    }
+    count_elementary_sum(massive, size);
 
-    if (free_massive_memory(massive, size)) {
-        printf("Memory can't be freed");
-        return -1;
-    }
+    free_massive_memory(massive, size);
 
+    t = mtime() - t;
+    printf("Threads library takes %ld ms", t);
+
+   // dlclose(lib_handler);
     return 0;
 }
