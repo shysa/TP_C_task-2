@@ -26,3 +26,17 @@ int output_time_test_data(const time_statistics statistics) {
 
     return 0;
 }
+
+int create_text_data(const int size) {
+    FILE * file = fopen(DEFAULT_INPUT_TXT, "w+");
+    if (!file) {
+        return -1;
+    }
+
+    for (int i = 0; i < size; i++) {
+        fprintf(file, "%d", DEFAULT_ARRAY_VALUE);
+    }
+    fclose(file);
+
+    return 0;
+}

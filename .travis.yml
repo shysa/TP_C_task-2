@@ -11,9 +11,12 @@ matrix:
       sudo: true
       compiler: gcc
 
+      python: 2.7.7
+
       addons:
         apt:
           sources:
+            - deadsnakes
             - ubuntu-toolchain-r-test
           packages:
             - cmake
@@ -24,6 +27,7 @@ matrix:
             - lcov
 
 before_install:
+  - sudo -H pip install --upgrade requests[security]
   - sudo apt-get -y install valgrind
   - pip install --user cpp-coveralls
 
@@ -38,4 +42,4 @@ script:
   - cppcheck --enable=all --std=c99 --check-config ./
 
 after_success:
-  - coveralls --root .. --build-root . -E ".*CMakeFiles.*" -E ".*googletest*" --gcov /usr/bin/gcov --gcov-options '\-lp'
+  - coveralls --build-root . --root .. --exclude "CMakeFiles/" --exclude "googletest/" --exclude "include/" --exclude "src/" --exclude "tests/" --gcov-options '\-lp'

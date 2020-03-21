@@ -134,13 +134,27 @@ int* get_array_memory(size_t * size, const size_t size_array_mb) {
     return massive;
 }
 
-int init_array(int* array, size_t size) {
+int init_array(FILE * input, int* array, size_t size) {
     if (!array || !size) {
         return -1;
     }
 
     for (size_t i = 0; i < size; i++) {
-        array[i] = 2;
+        if (!fscanf(input, "%d ", &array[i])) {
+            free_array_memory(array, size);
+            return -1;
+        }
+    }
+    return 0;
+}
+
+int init_array_simple(int* array, size_t size) {
+    if (!array || !size) {
+        return -1;
+    }
+
+    for (size_t i = 0; i < size; i++) {
+        array[i] = ARRAY_VALUE;
     }
     return 0;
 }

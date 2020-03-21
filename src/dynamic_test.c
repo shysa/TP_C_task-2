@@ -26,7 +26,7 @@ int main() {
 
     // GET FUNCTIONS ==================================================================================
     void* (*get_array_memory)(size_t * size, const size_t size_array_mb);
-    void* (*init_array)(int* massive, const size_t size);
+    void* (*init_array)(FILE * input, int* massive, const size_t size);
     void* (*count_elementary_sum)(const int * massive, const size_t size, int * sum);
     void* (*free_array_memory)(int* massive, const size_t size);
 
@@ -67,10 +67,19 @@ int main() {
             fprintf(stderr, "Memory allocation error");
             return -1;
         }
-        if (init_array(array, size)) {
+
+        if (create_text_data(size)) {
+            fprintf(stderr, "Can't open input file");
+            return -1;
+        }
+        FILE * file = fopen(DEFAULT_INPUT_TXT, "r");
+
+        if (init_array(file, array, size)) {
             fprintf(stderr, "Initialization error");
             return -1;
         }
+
+        fclose(file);
 
         for (char i = 0; i < ACCURACY; i++) {
             t = mtime();

@@ -23,10 +23,19 @@ int main() {
             fprintf(stderr, "Memory allocation error");
             return -1;
         }
-        if (init_array(array, size)) {
+
+        if (create_text_data(size)) {
+            fprintf(stderr, "Can't open input file");
+            return -1;
+        }
+        FILE * file = fopen(DEFAULT_INPUT_TXT, "r");
+
+        if (init_array(file, array, size)) {
             fprintf(stderr, "Initialization error");
             return -1;
         }
+
+        fclose(file);
 
         for (char i = 0; i < ACCURACY; i++) {
             t = mtime();
