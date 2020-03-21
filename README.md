@@ -1,5 +1,8 @@
 # TP_C_task-2
 
+[![Build Status](https://travis-ci.org/shysa/TP_C_task-2.svg?branch=dev)](https://travis-ci.org/shysa/TP_C_task-2)
+[![Coverage Status](https://coveralls.io/repos/github/shysa/TP_C_task-2/badge.svg?branch=dev)](https://coveralls.io/github/shysa/TP_C_task-2?branch=dev)
+
 ИЗ2 посвящено приобретению навыков системной разработки на C и работе с внешними библиотеками. В качестве результата
 ИЗ2 ожидается:
 * грамотное разбиение проекта на файлы;
