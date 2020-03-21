@@ -1,29 +1,32 @@
-#include "dlib_includes.h"
+#include "../include/lib_includes.h"
+
+#include <pthread.h>
+#include <sys/sysinfo.h>
 
 // -----------------------------------------------------------------------------------
 typedef struct {
     size_t size;
     int offset;
-    int * massive;
+    int * array;
     int thr_sum;
-} thr_part_massive;
+} thr_part_array;
 
 // Подсчет суммы части массива
 void* count_part_sum(void* thr_data) {
-    thr_part_massive* data = (thr_part_massive*) thr_data;
+    thr_part_array* data = (thr_part_array*) thr_data;
 
     int start_thr_index = data->offset * data->size;
     data->thr_sum = 0;
 
     for(size_t i = start_thr_index; i < start_thr_index + data->size; i++) {
-        data->thr_sum += data->massive[i] % MODULE;
+        data->thr_sum += data->array[i] % MODULE;
         data->thr_sum %= MODULE;
     }
 
     return NULL;
 }
 
-void start_threads(pthread_t* threads, thr_part_massive* thr_data, int thr_count) {
+void start_threads(pthread_t* threads, thr_part_array* thr_data, int thr_count) {
     for (size_t i = 0; i < thr_count; i++) {
         pthread_create(&(threads[i]), NULL, count_part_sum, &thr_data[i]);
     }
@@ -33,7 +36,7 @@ void start_threads(pthread_t* threads, thr_part_massive* thr_data, int thr_count
     }
 }
 
-int init_threads(thr_part_massive* thr_data, const int * massive, const int thr_count, const size_t massive_size) {
+int init_threads(thr_part_array* thr_data, const int * massive, const int thr_count, const size_t massive_size) {
     if (!thr_data || !massive || !thr_count || !massive_size) {
         return -1;
     }
@@ -41,7 +44,7 @@ int init_threads(thr_part_massive* thr_data, const int * massive, const int thr_
     for (size_t i = 0; i < thr_count; i++) {
         thr_data[i].offset = i;
         thr_data[i].size = massive_size / thr_count;
-        thr_data[i].massive = (int *) massive;
+        thr_data[i].array = (int *) massive;
     }
     return 0;
 }
@@ -54,9 +57,9 @@ pthread_t* get_memory_thr_handlers(int thr_count) {
     }
     return threads;
 }
-thr_part_massive* get_memory_thr_data(int thr_count) {
+thr_part_array* get_memory_thr_data(int thr_count) {
     //кол-во потоков = кол-во структур потоковых данных
-    thr_part_massive* thr_data = (thr_part_massive*) malloc(thr_count * sizeof(thr_part_massive));
+    thr_part_array* thr_data = (thr_part_array*) malloc(thr_count * sizeof(thr_part_array));
     if (!thr_data) {
         return NULL;
     }
@@ -70,7 +73,7 @@ int free_thread_memory(pthread_t* threads) {
     free(threads);
     return 0;
 }
-int free_thrdata_memory(thr_part_massive* thr_data) {
+int free_thrdata_memory(thr_part_array* thr_data) {
     if (!thr_data) {
         return -1;
     }
@@ -80,12 +83,15 @@ int free_thrdata_memory(thr_part_massive* thr_data) {
 
 // -----------------------------------------------------------------------------------
 
-int count_elementary_sum(const int * massive, const size_t size) {
-    int sum = 0;
+int count_elementary_sum(const int * array, const size_t size, int * sum) {
+    if (!array || !size) {
+        return -1;
+    }
+    *sum = 0;
 
     int thr_count = get_nprocs();
     pthread_t* threads = NULL;
-    thr_part_massive* thr_data = NULL;
+    thr_part_array* thr_data = NULL;
 
     threads = get_memory_thr_handlers(thr_count);
     if (!threads) {
@@ -96,15 +102,15 @@ int count_elementary_sum(const int * massive, const size_t size) {
         return -1;
     }
 
-    if (init_threads(thr_data, massive, thr_count, size)) {
+    if (init_threads(thr_data, array, thr_count, size)) {
         return -1;
     }
 
     start_threads(threads, thr_data, thr_count);
 
     for (size_t i = 0; i < thr_count; i++) {
-        sum += thr_data[i].thr_sum % MODULE;
-        sum %= MODULE;
+        *sum += thr_data[i].thr_sum % MODULE;
+        *sum %= MODULE;
     }
 
     if (free_thread_memory(threads)) {
@@ -117,8 +123,8 @@ int count_elementary_sum(const int * massive, const size_t size) {
     return 0;
 }
 
-int* get_massive_memory(size_t * size) {
-    *size = (SIZE_MB * 1024 * 1024) / sizeof(int);
+int* get_array_memory(size_t * size, const size_t size_array_mb) {
+    *size = (size_array_mb * 1024 * 1024) / sizeof(int);
 
     int *massive = (int *) malloc(*size * sizeof(int));
     if (!massive) {
@@ -128,21 +134,21 @@ int* get_massive_memory(size_t * size) {
     return massive;
 }
 
-int init_massive(int* massive, const size_t size) {
-    if (!massive || !size) {
+int init_array(int* array, size_t size) {
+    if (!array || !size) {
         return -1;
     }
 
     for (size_t i = 0; i < size; i++) {
-        massive[i] = rand() % 1025;
+        array[i] = 2;
     }
     return 0;
 }
 
-int free_massive_memory(int* massive, const size_t size) {
-    if (!massive || !size) {
+int free_array_memory(int* array, size_t size) {
+    if (!array || !size) {
         return -1;
     }
-    free(massive);
+    free(array);
     return 0;
 }

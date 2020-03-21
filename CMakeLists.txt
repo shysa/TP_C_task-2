@@ -11,17 +11,18 @@ set(CMAKE_CXX_FLAGS -pthread)
 set(CMAKE_C_FLAGS "-fprofile-arcs -ftest-coverage")
 set(CMAKE_EXE_LINKER_FLAGS "-lgcov --coverage")
 
-include_directories(include src library_static library_dynamic)
+include_directories(include src libraries)
 
-add_executable(main src/main.c)
-add_library(timer_lib STATIC src/timer.c)
+add_executable(static_test src/static_test.c)
+add_executable(dynamic_test src/dynamic_test.c)
 
-add_library(static_lib STATIC library_static/library.c)
-#add_library(dynamic_lib MODULE library_dynamic/library_dynamic.c)
-#add_library(static_lib STATIC library_dynamic/library_dynamic.c)
+add_library(timer_lib STATIC src/time_test_funcs.c)
 
-target_link_libraries(main static_lib timer_lib ${CMAKE_THREAD_LIBS_INIT})
-#target_link_libraries(main ${CMAKE_DL_LIBS})
+add_library(static_lib STATIC libraries/static_library.c)
+add_library(dynamic_lib MODULE libraries/dynamic_library.c)
+
+target_link_libraries(static_test static_lib timer_lib ${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(dynamic_test timer_lib ${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
 
 enable_testing()
 
