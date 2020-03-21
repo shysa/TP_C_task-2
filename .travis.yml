@@ -42,4 +42,4 @@ script:
   - cppcheck --enable=all --std=c99 --check-config ./
 
 after_success:
-  - coveralls --build-root . --root .. --exclude "CMakeFiles/" --exclude "build/" --exclude "googletest/" --exclude "include/" --exclude "src/" --exclude "tests/" --gcov-options '\-lp'
+  - coveralls --build-root . --root .. --exclude "CMakeFiles/" --exclude "googletest/" --exclude "include/" --exclude "src/" --exclude "tests/" --gcov-options '\-lp'
