@@ -20,7 +20,7 @@ TEST(StaticLibrary, GetArrayMemorySuccess) {
     int* array = nullptr;
 
     array = get_array_memory(&size, SIZE_MB);
-    ASSERT_TRUE(array);
+    EXPECT_TRUE(array);
     free_array_memory(array, size);
 }
 
@@ -29,7 +29,7 @@ TEST(StaticLibrary, CalcArraySize) {
     int* array = nullptr;
 
     array = get_array_memory(&size, SIZE_MB);
-    ASSERT_TRUE(array);
+    EXPECT_TRUE(array);
 
     EXPECT_TRUE(size != 0);
 
@@ -48,7 +48,7 @@ TEST(StaticLibrary, InitExistingArray) {
     int* array = nullptr;
 
     array = get_array_memory(&size, SIZE_MB);
-    ASSERT_TRUE(array);
+    EXPECT_TRUE(array);
 
     EXPECT_FALSE(init_array_simple(array, size));
     EXPECT_EQ(array[0], ARRAY_VALUE_FOR_SIMPLE_INIT);
@@ -98,12 +98,38 @@ TEST(StaticLibrary, InitExistingFileArray) {
     file = fopen("data_test_input.txt", "r");
 
     array = get_array_memory(&size, SIZE_MB);
-    ASSERT_TRUE(array);
+    EXPECT_TRUE(array);
 
     EXPECT_FALSE(init_array(file, array, 15));
     for (int i = 0; i < 15; i++) {
         EXPECT_EQ(array[i], data[i]);
     }
+
+    free_array_memory(array, size);
+
+    fclose(file);
+}
+
+TEST(StaticLibrary, InitWrongDataFileArray) {
+    size_t size = 0;
+    int* array = nullptr;
+
+    const char data[5] = {
+            'a', 'b', 'c', 'd', 'e'
+    };
+
+    FILE * file = fopen("data_test_input.txt", "w+");
+    for (int value : data) {
+        fprintf(file, "%c ", value);
+    }
+    fclose(file);
+
+    file = fopen("data_test_input.txt", "r");
+
+    array = get_array_memory(&size, SIZE_MB);
+    EXPECT_TRUE(array);
+
+    EXPECT_TRUE(init_array(file, array, 5));
 
     free_array_memory(array, size);
 
@@ -123,7 +149,7 @@ TEST(StaticLibrary, CalcElementarySum) {
     int* array = nullptr;
 
     array = get_array_memory(&size, SIZE_MB);
-    ASSERT_TRUE(array);
+    EXPECT_TRUE(array);
     init_array_simple(array, size);
 
     int sum = 0;
@@ -139,7 +165,7 @@ TEST(StaticLibrary, FreeArrayMemory) {
     int* array = nullptr;
 
     array = get_array_memory(&size, SIZE_MB);
-    ASSERT_TRUE(array);
+    EXPECT_TRUE(array);
 
     EXPECT_FALSE(free_array_memory(array, size));
 }
@@ -158,7 +184,7 @@ TEST(StaticLibrary, CountSuccess) {
     int sum = 0;
 
     array = get_array_memory(&size, SIZE_MB);
-    ASSERT_TRUE(array);
+    EXPECT_TRUE(array);
 
     init_array_simple(array, size);
 
@@ -209,7 +235,7 @@ TEST_F(FunctionListTest, GetArrayMemorySuccess) {
 
     array = (int *)functionList.get_array_memory(&size, SIZE_MB);
 
-    ASSERT_TRUE(array);
+    EXPECT_TRUE(array);
     functionList.free_array_memory(array, size);
 }
 
@@ -218,7 +244,7 @@ TEST_F(FunctionListTest, CalcArraySize) {
     int* array = nullptr;
 
     array = (int *)(functionList.get_array_memory(&size, SIZE_MB));
-    ASSERT_TRUE(array);
+    EXPECT_TRUE(array);
 
     EXPECT_TRUE(size != 0);
 
@@ -237,7 +263,7 @@ TEST_F(FunctionListTest, InitExistingArray) {
     int* array = nullptr;
 
     array = (int *)functionList.get_array_memory(&size, SIZE_MB);
-    ASSERT_TRUE(array);
+    EXPECT_TRUE(array);
 
     EXPECT_FALSE(functionList.init_array_simple(array, size));
 
@@ -286,12 +312,38 @@ TEST_F(FunctionListTest, InitExistingFileArray) {
     file = fopen("data_test_input.txt", "r");
 
     array = (int *)functionList.get_array_memory(&size, SIZE_MB);
-    ASSERT_TRUE(array);
+    EXPECT_TRUE(array);
 
     EXPECT_FALSE(functionList.init_array(file, array, 15));
     for (int i = 0; i < 15; i++) {
         EXPECT_EQ(array[i], data[i]);
     }
+
+    functionList.free_array_memory(array, size);
+
+    fclose(file);
+}
+
+TEST_F(FunctionListTest, InitWrongDataFileArray) {
+    size_t size = 0;
+    int* array = nullptr;
+
+    const char data[5] = {
+            'a', 'b', 'c', 'd', 'e'
+    };
+
+    FILE * file = fopen("data_test_input.txt", "w+");
+    for (int value : data) {
+        fprintf(file, "%c ", value);
+    }
+    fclose(file);
+
+    file = fopen("data_test_input.txt", "r");
+
+    array = (int *)functionList.get_array_memory(&size, SIZE_MB);
+    EXPECT_TRUE(array);
+
+    EXPECT_TRUE(functionList.init_array(file, array, 5));
 
     functionList.free_array_memory(array, size);
 
@@ -311,7 +363,7 @@ TEST_F(FunctionListTest, CalcElementarySum) {
     int* array = nullptr;
 
     array = (int *)functionList.get_array_memory(&size, SIZE_MB);
-    ASSERT_TRUE(array);
+    EXPECT_TRUE(array);
 
     functionList.init_array_simple(array, size);
 
@@ -328,7 +380,7 @@ TEST_F(FunctionListTest, FreeArrayMemory) {
     int* array = nullptr;
 
     array = (int *)functionList.get_array_memory(&size, SIZE_MB);
-    ASSERT_TRUE(array);
+    EXPECT_TRUE(array);
 
     EXPECT_FALSE(functionList.free_array_memory(array, size));
 }
@@ -349,7 +401,7 @@ TEST_F(FunctionListTest, CompareResults) {
     int sum_static = 0;
 
     array_static = get_array_memory(&size_static, SIZE_MB);
-    ASSERT_TRUE(array_static);
+    EXPECT_TRUE(array_static);
 
     init_array_simple(array_static, size_static);
     count_elementary_sum(array_static, size_static, &sum_static);
@@ -362,7 +414,7 @@ TEST_F(FunctionListTest, CompareResults) {
     int sum_dynamic = 0;
 
     array_dynamic = (int *)functionList.get_array_memory(&size_dynamic, SIZE_MB);
-    ASSERT_TRUE(array_dynamic);
+    EXPECT_TRUE(array_dynamic);
 
     functionList.init_array_simple(array_dynamic, size_dynamic);
     functionList.count_elementary_sum(array_dynamic, size_dynamic, &sum_dynamic);
