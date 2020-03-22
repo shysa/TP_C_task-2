@@ -51,7 +51,7 @@ TEST(StaticLibrary, InitExistingArray) {
     ASSERT_TRUE(array);
 
     EXPECT_FALSE(init_array_simple(array, size));
-    EXPECT_EQ(array[0], ARRAY_VALUE);
+    EXPECT_EQ(array[0], ARRAY_VALUE_FOR_SIMPLE_INIT);
 
     free_array_memory(array, size);
 }

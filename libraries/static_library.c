@@ -1,44 +1,51 @@
 #include "lib_includes.h"
 
-int* get_array_memory(size_t * size, const size_t size_array_mb) {
+int* get_array_memory(size_t * size, size_t size_array_mb) {
     *size = (size_array_mb * 1024 * 1024) / sizeof(int);
 
     int *array = (int *) malloc(*size * sizeof(int));
     if (!array) {
-        return NULL;
+        return ALLOCATION_ERROR;
     }
 
     return array;
 }
 
 int init_array(FILE * input, int* array, size_t size) {
-    if (!array || !size) {
-        return -1;
+    if (!array || !size || !input) {
+        return INVALID_DATA;
     }
 
+    bool error = false;
     for (size_t i = 0; i < size; i++) {
         if (!fscanf(input, "%d ", &array[i])) {
+            error = true;
             free_array_memory(array, size);
-            return -1;
+            break;
         }
     }
-    return 0;
+    if (error) {
+        return INVALID_DATA;
+    }
+
+    return SUCCESS;
 }
 
 int init_array_simple(int* array, size_t size) {
     if (!array || !size) {
-        return -1;
+        return INVALID_DATA;
     }
 
     for (size_t i = 0; i < size; i++) {
-        array[i] = ARRAY_VALUE;
+        array[i] = ARRAY_VALUE_FOR_SIMPLE_INIT;
     }
-    return 0;
+
+    return SUCCESS;
 }
 
-int count_elementary_sum(const int * array, const size_t size, int * sum) {
+int count_elementary_sum(const int * array, size_t size, int * sum) {
     if (!array || !size) {
-        return -1;
+        return INVALID_DATA;
     }
 
     *sum = 0;
@@ -47,13 +54,15 @@ int count_elementary_sum(const int * array, const size_t size, int * sum) {
         *sum += array[i] % MODULE;
         *sum %= MODULE;
     }
-    return 0;
+
+    return SUCCESS;
 }
 
 int free_array_memory(int* array, size_t size) {
     if (!array || !size) {
-        return -1;
+        return ERROR_FREE_MEMORY;
     }
     free(array);
-    return 0;
+
+    return SUCCESS;
 }

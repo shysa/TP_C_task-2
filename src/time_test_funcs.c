@@ -11,7 +11,7 @@ long mtime() {
 int output_time_test_data(const time_statistics statistics) {
     FILE * file = fopen("time_statistics.txt", "a+");
     if (!file) {
-        return -1;
+        return ERROR_OPEN_OUTPUT_TEST_FILE;
     }
 
     fprintf(file, "-----------------------------------------------------\n");
@@ -24,19 +24,22 @@ int output_time_test_data(const time_statistics statistics) {
 
     fclose(file);
 
-    return 0;
+    return SUCCESS;
 }
 
-int create_text_data(const int size) {
+int create_text_data(int size) {
+    if (!size) {
+        return INVALID_DATA;
+    }
     FILE * file = fopen(DEFAULT_INPUT_TXT, "w+");
     if (!file) {
-        return -1;
+        return ERROR_OPEN_INPUT_TEST_FILE;
     }
 
     for (int i = 0; i < size; i++) {
-        fprintf(file, "%d", DEFAULT_ARRAY_VALUE);
+        fprintf(file, "%d ", DEFAULT_ARRAY_VALUE_FOR_TEST);
     }
     fclose(file);
 
-    return 0;
+    return SUCCESS;
 }

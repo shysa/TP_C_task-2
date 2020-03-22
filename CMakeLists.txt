@@ -27,4 +27,4 @@ target_link_libraries(dynamic_test timer_lib ${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIB
 enable_testing()
 
 add_subdirectory(googletest)
-add_subdirectory(tests)
+add_subdirectory(unit_tests)

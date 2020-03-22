@@ -21,7 +21,7 @@ int main() {
     if (!library) {
         fprintf(stderr,"dlopen() error: %s\n", dlerror());
         dlclose(library);
-        return -1;
+        return ERROR_OPEN_LIBRARY;
     }
 
     // GET FUNCTIONS ==================================================================================
@@ -34,28 +34,28 @@ int main() {
     if (!get_array_memory) {
         fprintf(stderr,"%s\n", dlerror());
         dlclose(library);
-        return -1;
+        return ERROR_OPEN_LIBRARY_FUNCTION;
     }
 
     *(void**)(&init_array)= dlsym(library, "init_array");
     if (!init_array) {
         fprintf(stderr,"%s\n", dlerror());
         dlclose(library);
-        return -1;
+        return ERROR_OPEN_LIBRARY_FUNCTION;
     }
 
     *(void**)(&count_elementary_sum)= dlsym(library, "count_elementary_sum");
     if (!count_elementary_sum) {
         fprintf(stderr,"%s\n", dlerror());
         dlclose(library);
-        return -1;
+        return ERROR_OPEN_LIBRARY_FUNCTION;
     }
 
     *(void**)(&free_array_memory)= dlsym(library, "free_array_memory");
     if (!free_array_memory) {
         fprintf(stderr,"%s\n", dlerror());
         dlclose(library);
-        return -1;
+        return ERROR_OPEN_LIBRARY_FUNCTION;
     }
 
     // TESTING ========================================================================================
@@ -65,48 +65,52 @@ int main() {
         array = get_array_memory(&size, size_array_mb);
         if (!array) {
             fprintf(stderr, "Memory allocation error");
-            return -1;
+            return ERROR_ALLOCATION_MEMORY;
         }
 
         if (create_text_data(size)) {
             fprintf(stderr, "Can't open input file");
-            return -1;
+            return ERROR_OPEN_FILE;
         }
         FILE * file = fopen(DEFAULT_INPUT_TXT, "r");
 
         if (init_array(file, array, size)) {
             fprintf(stderr, "Initialization error");
-            return -1;
+            return ERROR_INITIALIZATION_ARRAY;
         }
-
         fclose(file);
 
+        bool error = false;
         for (char i = 0; i < ACCURACY; i++) {
             t = mtime();
             if (count_elementary_sum(array, size, &get_sum)) {
+                error = true;
                 fprintf(stderr, "Sum calculating error");
-                return -1;
+                break;
             }
             t = mtime() - t;
-
             avg_time += t;
         }
+        if (error) {
+            return ERROR_COUNT_ELEMENTARY_SUM;
+        }
+
         if (free_array_memory(array, size)) {
             fprintf(stderr, "Memory freeing error");
-            return -1;
+            return ERROR_MEMORY_FREE;
         }
 
         avg_time /= ACCURACY;
-
         time_statistics dlib_statistics = {
                 .size_array_mb = size_array_mb,
                 .avg_time = avg_time,
                 .lib_type = "DYNAMIC LIB",
                 .module_sum = get_sum
         };
+
         if (output_time_test_data(dlib_statistics)) {
             fprintf(stderr, "Can't print results into file");
-            return -1;
+            return ERROR_OPEN_FILE;
         }
 
         printf("Dynamic library takes %ld ms for %d MB\n", avg_time, size_array_mb);
@@ -114,5 +118,5 @@ int main() {
 
     dlclose(library);
 
-    return 0;
+    return SUCCESS;
 }

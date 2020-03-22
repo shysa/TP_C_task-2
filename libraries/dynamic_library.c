@@ -8,161 +8,171 @@ typedef struct {
     size_t size;
     int offset;
     int * array;
-    int thr_sum;
-} thr_part_array;
+    int thread_sum;
+} thread_part_array;
 
 // Подсчет суммы части массива
-void* count_part_sum(void* thr_data) {
-    thr_part_array* data = (thr_part_array*) thr_data;
+void* count_part_sum(void* thread_data) {
+    thread_part_array* data = (thread_part_array*) thread_data;
 
-    int start_thr_index = data->offset * data->size;
-    data->thr_sum = 0;
+    int start_thread_index = data->offset * data->size;
+    data->thread_sum = 0;
 
-    for(size_t i = start_thr_index; i < start_thr_index + data->size; i++) {
-        data->thr_sum += data->array[i] % MODULE;
-        data->thr_sum %= MODULE;
+    for (size_t i = start_thread_index; i < start_thread_index + data->size; i++) {
+        data->thread_sum += data->array[i] % MODULE;
+        data->thread_sum %= MODULE;
     }
 
     return NULL;
 }
 
-void start_threads(pthread_t* threads, thr_part_array* thr_data, int thr_count) {
-    for (size_t i = 0; i < thr_count; i++) {
-        pthread_create(&(threads[i]), NULL, count_part_sum, &thr_data[i]);
+void start_threads(pthread_t* threads, thread_part_array* thread_data, int thread_count) {
+    for (size_t i = 0; i < thread_count; i++) {
+        pthread_create(&(threads[i]), NULL, count_part_sum, &thread_data[i]);
     }
     //ожидание выполнения всех потоков
-    for(int i = 0; i < thr_count; i++) {
+    for (int i = 0; i < thread_count; i++) {
         pthread_join(threads[i], NULL);
     }
 }
 
-int init_threads(thr_part_array* thr_data, const int * massive, const int thr_count, const size_t massive_size) {
-    if (!thr_data || !massive || !thr_count || !massive_size) {
-        return -1;
+int init_threads(thread_part_array* thread_data, const int * array, int thread_count, size_t array_size) {
+    if (!thread_data || !array || !thread_count || !array_size) {
+        return INVALID_DATA;
     }
 
-    for (size_t i = 0; i < thr_count; i++) {
-        thr_data[i].offset = i;
-        thr_data[i].size = massive_size / thr_count;
-        thr_data[i].array = (int *) massive;
+    for (size_t i = 0; i < thread_count; i++) {
+        thread_data[i].offset = i;
+        thread_data[i].size = array_size / thread_count;
+        thread_data[i].array = (int *) array;
     }
-    return 0;
+    return SUCCESS;
 }
 
-pthread_t* get_memory_thr_handlers(int thr_count) {
+pthread_t* get_memory_thread_handlers(int thread_count) {
     //память под массив идентификаторов потоков
-    pthread_t* threads = (pthread_t*) malloc(thr_count * sizeof(pthread_t));
+    pthread_t* threads = (pthread_t*) malloc(thread_count * sizeof(pthread_t));
     if (!threads) {
-        return NULL;
+        return ALLOCATION_ERROR;
     }
     return threads;
 }
-thr_part_array* get_memory_thr_data(int thr_count) {
+thread_part_array* get_memory_thread_data(int thread_count) {
     //кол-во потоков = кол-во структур потоковых данных
-    thr_part_array* thr_data = (thr_part_array*) malloc(thr_count * sizeof(thr_part_array));
-    if (!thr_data) {
-        return NULL;
+    thread_part_array* thread_data = (thread_part_array*) malloc(thread_count * sizeof(thread_part_array));
+    if (!thread_data) {
+        return ALLOCATION_ERROR;
     }
-    return thr_data;
+    return thread_data;
 }
 
 int free_thread_memory(pthread_t* threads) {
     if (!threads) {
-        return -1;
+        return ERROR_FREE_MEMORY;
     }
     free(threads);
-    return 0;
+
+    return SUCCESS;
 }
-int free_thrdata_memory(thr_part_array* thr_data) {
-    if (!thr_data) {
-        return -1;
+int free_thread_data_memory(thread_part_array* thread_data) {
+    if (!thread_data) {
+        return ERROR_FREE_MEMORY;
     }
-    free(thr_data);
-    return 0;
+    free(thread_data);
+
+    return SUCCESS;
 }
 
 // -----------------------------------------------------------------------------------
 
 int count_elementary_sum(const int * array, const size_t size, int * sum) {
     if (!array || !size) {
-        return -1;
+        return INVALID_DATA;
     }
     *sum = 0;
 
-    int thr_count = get_nprocs();
+    int thread_count = get_nprocs();
     pthread_t* threads = NULL;
-    thr_part_array* thr_data = NULL;
+    thread_part_array* thread_data = NULL;
 
-    threads = get_memory_thr_handlers(thr_count);
+    threads = get_memory_thread_handlers(thread_count);
     if (!threads) {
-        return -1;
+        return (int) ALLOCATION_ERROR;
     }
-    thr_data = get_memory_thr_data(thr_count);
-    if (!thr_data) {
-        return -1;
-    }
-
-    if (init_threads(thr_data, array, thr_count, size)) {
-        return -1;
+    thread_data = get_memory_thread_data(thread_count);
+    if (!thread_data) {
+        return (int) ALLOCATION_ERROR;
     }
 
-    start_threads(threads, thr_data, thr_count);
+    if (init_threads(thread_data, array, thread_count, size)) {
+        return INVALID_DATA;
+    }
 
-    for (size_t i = 0; i < thr_count; i++) {
-        *sum += thr_data[i].thr_sum % MODULE;
+    start_threads(threads, thread_data, thread_count);
+
+    for (size_t i = 0; i < thread_count; i++) {
+        *sum += thread_data[i].thread_sum % MODULE;
         *sum %= MODULE;
     }
 
     if (free_thread_memory(threads)) {
-        return -1;
+        return ERROR_FREE_MEMORY;
     }
-    if (free_thrdata_memory(thr_data)) {
-        return -1;
+    if (free_thread_data_memory(thread_data)) {
+        return ERROR_FREE_MEMORY;
     }
 
-    return 0;
+    return SUCCESS;
 }
 
 int* get_array_memory(size_t * size, const size_t size_array_mb) {
     *size = (size_array_mb * 1024 * 1024) / sizeof(int);
 
-    int *massive = (int *) malloc(*size * sizeof(int));
-    if (!massive) {
-        return NULL;
+    int *array = (int *) malloc(*size * sizeof(int));
+    if (!array) {
+        return ALLOCATION_ERROR;
     }
 
-    return massive;
+    return array;
 }
 
 int init_array(FILE * input, int* array, size_t size) {
-    if (!array || !size) {
-        return -1;
+    if (!array || !size || !input) {
+        return INVALID_DATA;
     }
 
+    bool error = false;
     for (size_t i = 0; i < size; i++) {
         if (!fscanf(input, "%d ", &array[i])) {
+            error = true;
             free_array_memory(array, size);
-            return -1;
+            break;
         }
     }
-    return 0;
+    if (error) {
+        return INVALID_DATA;
+    }
+
+    return SUCCESS;
 }
 
 int init_array_simple(int* array, size_t size) {
     if (!array || !size) {
-        return -1;
+        return INVALID_DATA;
     }
 
     for (size_t i = 0; i < size; i++) {
-        array[i] = ARRAY_VALUE;
+        array[i] = ARRAY_VALUE_FOR_SIMPLE_INIT;
     }
-    return 0;
+
+    return SUCCESS;
 }
 
 int free_array_memory(int* array, size_t size) {
     if (!array || !size) {
-        return -1;
+        return ERROR_FREE_MEMORY;
     }
     free(array);
-    return 0;
+
+    return SUCCESS;
 }

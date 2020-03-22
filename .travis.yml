@@ -38,8 +38,8 @@ script:
   - cd build
   - cmake ..
   - make
-  - valgrind --leak-check=full --leak-resolution=med --track-origins=yes --vgdb=no ./tests/Google_Tests_run
+  - valgrind --leak-check=full --leak-resolution=med --track-origins=yes --vgdb=no ./unit_tests/Google_Tests_run
   - cppcheck --enable=all --std=c99 --check-config ./
 
 after_success:
-  - coveralls --build-root . --root .. --exclude "CMakeFiles/" --exclude "googletest/" --exclude "include/" --exclude "src/" --exclude "tests/" --gcov-options '\-lp'
+  - coveralls --build-root . --root .. --exclude "CMakeFiles/" --exclude "googletest/" --exclude "include/" --exclude "src/" --exclude "unit_tests/" --gcov-options '\-lp'
