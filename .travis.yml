@@ -1,0 +1,45 @@
+language: c
+
+branches:
+  only:
+    - dev
+
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+      sudo: true
+      compiler: gcc
+
+      python: 2.7.7
+
+      addons:
+        apt:
+          sources:
+            - deadsnakes
+            - ubuntu-toolchain-r-test
+          packages:
+            - cmake
+            - valgrind
+            - cppcheck
+            - gcc-7
+            - g++-7
+            - lcov
+
+before_install:
+  - sudo -H pip install --upgrade requests[security]
+  - sudo apt-get -y install valgrind
+  - pip install --user cpp-coveralls
+
+script:
+  - export CXX=/usr/bin/g++-7
+  - export C=/usr/bin/gcc-7
+  - mkdir build
+  - cd build
+  - cmake ..
+  - make
+  - valgrind --leak-check=full --leak-resolution=med --track-origins=yes --vgdb=no ./unit_tests/Static_Tests_run
+  - cppcheck --enable=all --std=c99 --check-config ./
+
+after_success:
+  - coveralls --build-root . --root .. --exclude "CMakeFiles/" --exclude "googletest/" --exclude "include/" --exclude "src/" --exclude "unit_tests/" --gcov-options '\-lp'
