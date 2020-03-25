@@ -1,9 +1,7 @@
 #include "lib_includes.h"
 
-int* get_array_memory(size_t * size, size_t size_array_mb) {
-    *size = (size_array_mb * 1024 * 1024) / sizeof(int);
-
-    int *array = (int *) malloc(*size * sizeof(int));
+int* get_array_memory(size_t size) {
+    int *array = (int*) malloc(size * sizeof(int));
     if (!array) {
         return ALLOCATION_ERROR;
     }
@@ -20,7 +18,7 @@ int init_array(FILE * input, int* array, size_t size) {
     for (size_t i = 0; i < size; i++) {
         if (!fscanf(input, "%d ", &array[i])) {
             error = true;
-            free_array_memory(array, size);
+            free_array_memory(array);
             break;
         }
     }
@@ -31,7 +29,41 @@ int init_array(FILE * input, int* array, size_t size) {
     return SUCCESS;
 }
 
-int init_array_simple(int* array, size_t size) {
+long division_modulo_value(long sum, int array_value, int module) {
+    if (!array_value || !module) {
+        return INVALID_DATA;
+    }
+    sum += array_value % module;
+    sum %= module;
+    return sum;
+}
+
+long count_elementary_sum(const int *array, size_t size, int module) {
+    if (!array || !size || !module) {
+        return INVALID_DATA;
+    }
+
+    long sum = 0;
+    for (size_t i = 0; i < size; i++) {
+        sum = division_modulo_value(sum, array[i], module);
+        if (sum < 0) {
+            return INVALID_DATA;
+        }
+    }
+
+    return sum;
+}
+
+int free_array_memory(int* array) {
+    if (!array) {
+        return ERROR_FREE_MEMORY;
+    }
+    free(array);
+
+    return SUCCESS;
+}
+
+int init_array_with_same_default_value(int* array, size_t size) {
     if (!array || !size) {
         return INVALID_DATA;
     }
@@ -39,30 +71,6 @@ int init_array_simple(int* array, size_t size) {
     for (size_t i = 0; i < size; i++) {
         array[i] = ARRAY_VALUE_FOR_SIMPLE_INIT;
     }
-
-    return SUCCESS;
-}
-
-int count_elementary_sum(const int * array, size_t size, int * sum) {
-    if (!array || !size) {
-        return INVALID_DATA;
-    }
-
-    *sum = 0;
-
-    for (size_t i = 0; i < size; i++) {
-        *sum += array[i] % MODULE;
-        *sum %= MODULE;
-    }
-
-    return SUCCESS;
-}
-
-int free_array_memory(int* array, size_t size) {
-    if (!array || !size) {
-        return ERROR_FREE_MEMORY;
-    }
-    free(array);
 
     return SUCCESS;
 }

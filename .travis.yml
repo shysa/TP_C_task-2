@@ -38,7 +38,7 @@ script:
   - cd build
   - cmake ..
   - make
-  - valgrind --leak-check=full --leak-resolution=med --track-origins=yes --vgdb=no ./unit_tests/Google_Tests_run
+  - valgrind --leak-check=full --leak-resolution=med --track-origins=yes --vgdb=no ./unit_tests/Static_Tests_run
   - cppcheck --enable=all --std=c99 --check-config ./
 
 after_success:

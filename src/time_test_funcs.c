@@ -16,10 +16,10 @@ int output_time_test_data(const time_statistics statistics) {
 
     fprintf(file, "-----------------------------------------------------\n");
     fprintf(file, "TESTED: %s\n", statistics.lib_type);
-    fprintf(file, "ACCURACY: %d ITERATIONS\n", ACCURACY);
-    fprintf(file, "ARRAY SIZE: %d MB\n", statistics.size_array_mb);
+    fprintf(file, "ITERATIONS: %d \n", MEASURE_TIME_ITERATIONS);
+    fprintf(file, "ARRAY SIZE: %d \n", statistics.size_array);
     fprintf(file, "AVERAGE TIME: %ld ms\n", statistics.avg_time);
-    fprintf(file, "RETURNED SUM: %d\n", statistics.module_sum);
+    fprintf(file, "RETURNED SUM: %ld\n", statistics.module_sum);
     fprintf(file, "-----------------------------------------------------\n\n");
 
     fclose(file);
@@ -41,5 +41,16 @@ int create_text_data(int size) {
     }
     fclose(file);
 
+    return SUCCESS;
+}
+
+int set_size_parameter(int argc, const char *argv[], size_t *size) {
+    if (argc != 2) {
+        *size = DEFAULT_ARRAY_SIZE;
+    } else {
+        if (scanf(argv[1], "%zd ", size) < 1) {
+            return INVALID_DATA;
+        }
+    }
     return SUCCESS;
 }
